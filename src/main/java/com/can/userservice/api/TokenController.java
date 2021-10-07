@@ -41,7 +41,7 @@ public class TokenController {
                 JWTVerifier jwtVerifier = JWT.require(algorithm).build();
                 DecodedJWT decodedJWT = jwtVerifier.verify(refresh_token);
                 String username = decodedJWT.getSubject();
-                User user = userService.getUser(username);
+                User user = userService.getUser(username).getData();
                 String access_token = JWT.create()
                         .withSubject(user.getUserName())
                         .withExpiresAt(new Date(System.currentTimeMillis() + 10 * 60 * 1000))

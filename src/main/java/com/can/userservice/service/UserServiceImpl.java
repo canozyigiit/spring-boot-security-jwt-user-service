@@ -4,6 +4,10 @@ import com.can.userservice.model.Role;
 import com.can.userservice.model.User;
 import com.can.userservice.repository.RoleRepository;
 import com.can.userservice.repository.UserRepository;
+import com.can.userservice.results.DataResult;
+import com.can.userservice.results.Result;
+import com.can.userservice.results.SuccessDataResult;
+import com.can.userservice.results.SuccessResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -35,8 +39,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         if (user == null){
             log.error("Kullanıcı bulunamadı");
             throw new UsernameNotFoundException("Kullanıcı bulunamadı");
-        }else {
-            log.error("Kullanıcı bulundu: {}",userName);
         }
         Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
         user.getRoles().forEach(role -> {authorities.add(new SimpleGrantedAuthority(role.getName()));
@@ -44,36 +46,43 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         return new org.springframework.security.core.userdetails.User(user.getName(),user.getPassword(),authorities);
     }
     @Override
-    public User save(User user) {
-        log.info("Veritabanına yeni bir kullanıcı eklendi {}",user.getName());
+    public DataResult<User> save(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
+        return new SuccessDataResult<User>(userRepository.save(user)) ;
+//        log.info("Veritabanına yeni bir kullanıcı eklendi {}",user.getName());
     }
 
     @Override
-    public Role saveRole(Role role) {
-        log.info("Veritabanına yeni bir rol eklendi {}",role.getName());
-        return roleRepository.save(role);
+    public DataResult<Role> saveRole(Role role) {
+       // log.info("Veritabanına yeni bir rol eklendi {}",role.getName());
+        return new SuccessDataResult<Role>(roleRepository.save(role)) ;
     }
 
     @Override
-    public void addRoleToUser(String userName, String roleName) {
-        log.info("{} adlı kullanıcıya yeni bir role atandı {}", userName ,roleName);
+    public Result addRoleToUser(String userName, String roleName) {
+      //  log.info("{} adlı kullanıcıya yeni bir role atandı {}", userName ,roleName);
         User user = userRepository.findByUserName(userName);
         Role role = roleRepository.findByName(roleName);
         user.getRoles().add(role);
+        return new SuccessResult("Kullancıya yeni rol atandı");
     }
 
     @Override
-    public User getUser(String userName) {
-        log.info("Kullanıcı getirildi {}",userName);
-        return userRepository.findByUserName(userName);
+    public DataResult<User> getUser(String userName) {
+       // log.info("Kullanıcı getirildi {}",userName);
+        return new SuccessDataResult<User>(userRepository.findByUserName(userName)) ;
     }
 
     @Override
-    public List<User> getUsers() {
-        log.info("Kullanıcılar getirildi ");
-        return userRepository.findAll();
+    public DataResult<List<User>> getUsers() {
+      //  log.info("Kullanıcılar getirildi ");
+        return new SuccessDataResult<List<User>>(userRepository.findAll()) ;
+    }
+
+    @Override
+    public DataResult<List<Role>> getRoles() {
+        //  log.info("Kullanıcılar getirildi ");
+        return new SuccessDataResult<List<Role>>(roleRepository.findAll()) ;
     }
 
 }
